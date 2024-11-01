@@ -80,14 +80,15 @@ public:
 class ConcludedState:public GameState
 {
 public:
-        void handleBoardReady(GameSM* game) override;
+       
+        void handleEndGame(GameSM* game) override;
 };
 
 
 class TerminatedState:public GameState
 {
 public:
-    void handleBoardReady(GameSM* game) override;
+    void handleAppLaunched(GameSM* game) override;
     
 };
 
@@ -125,31 +126,18 @@ class GameSM
 {
 public: 
     GameState* currentState;
-    GameSM():currentState(new ClosedState()){};
-    //{}
+    GameSM():currentState(){};
     GameSM(const GameSM& other);
-    // {
-    //     if (dynamic_cast<OpenState*>(other.currentState)) {
-    //         currentState = new OpenState();
-    //     } else if (dynamic_cast<ClosedState*>(other.currentState)) {
-    //         currentState = new ClosedState();
-    //     } else if (dynamic_cast<LockedState*>(other.currentState)) {
-    //         currentState = new LockedState();
-    //     }
-    // }
     GameSM& operator=(const GameSM& other); 
-    // {
-    //     if (this == &other) {
-    //         return *this;
-    //     }
-    //     delete currentState;
-    //     currentState = other.currentState;
-    //     return *this;
-    // }
+    GameSM(GameState* initialState) : currentState(initialState) {};
+
     void pushButton();
+    void startSM();
+    void stopSM();  
     void TurnKey();
     void SetState(GameState* newState);
     GameState* getCurrentState();
+    void printCurrentState();
 
 };
 
