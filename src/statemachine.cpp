@@ -25,30 +25,135 @@ void GameSM::printCurrentState()
     std::cout << "Current state: " << typeid(*presentState).name() << std::endl;
 
 }
-    
+
+ GameSM::GameSM(GameState* initialState)
+    {
+
+        currentState = initialState;
+          if (dynamic_cast<InitializedState*>(currentState))
+          {
+
+            stateID = StateID::INITIALIZED;
+
+          }
+          else if (dynamic_cast<PlayingState*>(currentState))
+          {
+            stateID = StateID::PLAYING;
+          }
+          else if (dynamic_cast<AnalyzingState*>(currentState))
+          {
+            stateID = StateID::ANALYZING;
+          }
+          else if (dynamic_cast<LoadingState*>(currentState))
+          {
+            stateID = StateID::LOADING;
+          }
+          else if (dynamic_cast<SavingState*>(currentState))
+          {
+            stateID = StateID::SAVING;
+          }
+          else if (dynamic_cast<ConcludedState*>(currentState))
+          {
+            stateID = StateID::CONCLUDED;
+          }
+          else if (dynamic_cast<TerminatedState*>(currentState))
+          {
+            stateID = StateID::TERMINATED;
+          }
+          else if (dynamic_cast<PauseState*>(currentState))
+          {
+            stateID = StateID::PAUSED;
+          }
+          else if (dynamic_cast<OpenState*>(currentState))
+          {
+            stateID = StateID::OPEN;
+          }
+          else if (dynamic_cast<ClosedState*>(currentState))
+          {
+            stateID = StateID::CLOSED;
+          }
+          else if (dynamic_cast<LockedState*>(currentState))
+          {
+            stateID = StateID::LOCKED;
+          }
+
+    };
+
+
+
 GameSM::GameSM(const GameSM& other) {
     if (dynamic_cast<InitializedState*>(other.currentState)) {
         currentState = new InitializedState();
+        stateID = StateID::INITIALIZED;
     } else if (dynamic_cast<PlayingState*>(other.currentState)) {
         currentState = new PlayingState();
+        stateID = StateID::PLAYING;
     } else if (dynamic_cast<AnalyzingState*>(other.currentState)) {
         currentState = new AnalyzingState();
+        stateID = StateID::ANALYZING;
     }
     else if (dynamic_cast<LoadingState*>(other.currentState)) {
         currentState = new LoadingState();
+        stateID = StateID::LOADING;
     }
     else if (dynamic_cast<PauseState*>(other.currentState)) {
         currentState = new PauseState();
+        stateID = StateID::PAUSED;
     } 
+    else if (dynamic_cast<SavingState*>(other.currentState)) {
+        currentState = new SavingState();
+        stateID = StateID::SAVING;
+    } else if (dynamic_cast<ConcludedState*>(other.currentState)) {
+        currentState = new ConcludedState();
+        stateID = StateID::CONCLUDED;
+    } else if (dynamic_cast<TerminatedState*>(other.currentState)) {
+        currentState = new TerminatedState();
+        stateID = StateID::TERMINATED;
+    } else if (dynamic_cast<OpenState*>(other.currentState)) {
+        currentState = new OpenState();
+        stateID = StateID::OPEN;
+    } else if (dynamic_cast<ClosedState*>(other.currentState)) {
+        currentState = new ClosedState();
+        stateID = StateID::CLOSED;
+    } else if (dynamic_cast<LockedState*>(other.currentState)) {
+        currentState = new LockedState();
+        stateID = StateID::LOCKED;
+    }
+
 
 
 }
+
+
 GameSM& GameSM::operator=(const GameSM& other) {
     if (this == &other) {
         return *this;
     }
     delete currentState;
     currentState = other.currentState;
+    if (dynamic_cast<InitializedState*>(other.currentState)) {
+        stateID = StateID::INITIALIZED;
+    } else if (dynamic_cast<PlayingState*>(other.currentState)) {
+        stateID = StateID::PLAYING;
+    } else if (dynamic_cast<AnalyzingState*>(other.currentState)) {
+        stateID = StateID::ANALYZING;
+    } else if (dynamic_cast<LoadingState*>(other.currentState)) {
+        stateID = StateID::LOADING;
+    } else if (dynamic_cast<SavingState*>(other.currentState)) {
+        stateID = StateID::SAVING;
+    } else if (dynamic_cast<ConcludedState*>(other.currentState)) {
+        stateID = StateID::CONCLUDED;
+    } else if (dynamic_cast<TerminatedState*>(other.currentState)) {
+        stateID = StateID::TERMINATED;
+    } else if (dynamic_cast<PauseState*>(other.currentState)) {
+        stateID = StateID::PAUSED;
+    } else if (dynamic_cast<OpenState*>(other.currentState)) {
+        stateID = StateID::OPEN;
+    } else if (dynamic_cast<ClosedState*>(other.currentState)) {
+        stateID = StateID::CLOSED;
+    } else if (dynamic_cast<LockedState*>(other.currentState)) {
+        stateID = StateID::LOCKED;
+    }
     return *this;
 }
 
@@ -75,14 +180,41 @@ void GameSM::TurnKey()
 
 void GameSM::SetState(GameState* newState)
 {
-    delete currentState;
-    currentState = newState;
+    StateID newStateID = newState->getStateID2();
+    StateID currStateID = currentState->getStateID2();
+
+ 
+    std::cout << "Transitioning from state: " << typeid(*currentState).name() << " to state: " << typeid(*newState).name() << std::endl;
+ 
+    assert((newStateID != currStateID) && "Invalid state reentry");
+    if (newStateID != currStateID)
+    {    
+        delete currentState;
+        currentState = newState;
+    }
 }
 
 GameState* GameSM::getCurrentState()
 {
 
 return this->currentState;
+
+}
+
+  StateID GameState::getStateID()
+  {
+    return stateID;
+  }
+
+InitializedState::InitializedState() {
+    std::cout << "InitializedState created.\n";
+    GameState::stateID=StateID::INITIALIZED;
+}
+
+StateID InitializedState::getStateID()
+{
+return this->stateID;
+
 
 }
 
@@ -99,6 +231,21 @@ void InitializedState::handleLoadGame(GameSM* game){
     std::cout << "Loading a game. Transitioning to LoadingState.\n";
         game->SetState(new LoadingState());
 }
+
+
+PlayingState::PlayingState() {
+    std::cout << "PlayingState created.\n";
+    GameState::stateID=StateID::PLAYING;
+}
+
+StateID PlayingState::getStateID()
+{
+return this->stateID;
+
+
+}
+
+
 
 void PlayingState::handleNewGame(GameSM* game) {
 
@@ -140,6 +287,20 @@ void PlayingState::handleResume(GameSM* game) {
         game->SetState(new PlayingState());
 }
 
+
+AnalyzingState::AnalyzingState() {
+    std::cout << "AnalyzingState created.\n";
+    GameState::stateID=StateID::ANALYZING;
+}
+
+StateID AnalyzingState::getStateID()
+{
+return this->stateID;
+
+
+}
+
+
 void AnalyzingState::handleTurn(GameSM* game) {
     assert(false && "Invalid state transition: AnalyzingState::handleTurn");
 }
@@ -150,6 +311,18 @@ void AnalyzingState::handlePieceMoved(GameSM* game){
 }
 
 
+
+SavingState::SavingState() {
+    std::cout << "SavingState created.\n";
+    GameState::stateID=StateID::ANALYZING;
+}
+
+StateID SavingState::getStateID()
+{
+return this->stateID;
+}
+
+
 void SavingState::handleBoardReady(GameSM* game)
 {
     std::cout << "Board is ready. Transitioning to PlayingState.\n";
@@ -157,15 +330,54 @@ void SavingState::handleBoardReady(GameSM* game)
 
 }
 
+
+LoadingState::LoadingState() {
+    std::cout << "LoadingState created.\n";
+    GameState::stateID=StateID::LOADING;
+}
+
+StateID LoadingState::getStateID()
+{
+return this->stateID;
+}
+
 void LoadingState::handleBoardReady(GameSM* game){
     std::cout << "Board is ready. Transitioning to PlayingState.\n";
         game->SetState(new PlayingState());
 }
 
+
+PauseState::PauseState() {
+    std::cout << "PauseState created.\n";
+    GameState::stateID=StateID::LOADING;
+}
+
+StateID PauseState::getStateID()
+{
+return this->stateID;
+}
+
+
+
 void PauseState::handleResume(GameSM* game){
     std::cout << "Resuming from pause. Transitioning to PlayingState.\n";
         game->SetState(new PlayingState());
 }
+
+
+
+ConcludedState::ConcludedState() {
+    std::cout << "ConcludedState created.\n";
+    GameState::stateID=StateID::CONCLUDED;
+}
+
+StateID ConcludedState::getStateID()
+{
+return this->stateID;
+}
+
+
+
 
 void ConcludedState::handleEndGame(GameSM* game)
 {
@@ -173,12 +385,35 @@ void ConcludedState::handleEndGame(GameSM* game)
     game->SetState(new TerminatedState());
 }
 
+TerminatedState::TerminatedState() {
+    std::cout << "TerminatedState created.\n";
+    GameState::stateID=StateID::TERMINATED;
+}
+
+StateID TerminatedState::getStateID()
+{
+return this->stateID;
+}
+
+
 void TerminatedState::handleAppLaunched(GameSM* game)
 {
 
     std::cout << "Application launched in TerminatedState. Performing Cleanup\n";
     
 }
+
+
+OpenState::OpenState() {
+    std::cout << "OpenState created.\n";
+    GameState::stateID=StateID::OPEN;
+}
+
+StateID OpenState::getStateID()
+{
+return this->stateID;
+}
+
 
 
 void OpenState::handlePushButtonEvent(GameSM* game) {
@@ -190,6 +425,19 @@ void OpenState::handleKeyTurnEvent(GameSM* game) {
     std::cout << "Door is open, not unlock possible.\n";
 }
 
+
+ClosedState::ClosedState() {
+    std::cout << "ClosedState created.\n";
+    GameState::stateID=StateID::CLOSED;
+}
+
+StateID ClosedState::getStateID()
+{
+return this->stateID;
+}
+
+
+
 void ClosedState::handlePushButtonEvent(GameSM* game) {
     std::cout << "Opening the door.\n";
     game->SetState(new OpenState());
@@ -199,6 +447,19 @@ void ClosedState::handleKeyTurnEvent(GameSM* game) {
     std::cout << "Locking the door.\n";
     game->SetState(new LockedState());
 }
+
+
+LockedState::LockedState() {
+    std::cout << "LockedState created.\n";
+    GameState::stateID=StateID::LOCKED;
+}
+
+StateID LockedState::getStateID()
+{
+return this->stateID;
+}
+
+
 
 void LockedState::handlePushButtonEvent(GameSM* game) {
     std::cout << "Door is locked. Cannot open.\n";

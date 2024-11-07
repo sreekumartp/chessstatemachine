@@ -52,7 +52,6 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(test_sm test/test_statemachine.cpp src/statemachine.cpp)
-add_executable(test_sm2 test/test_sm.cpp src/statemachine.cpp)
 
 # Link the test executable with the main project and GoogleTest
 target_link_libraries(test_sm ${GTEST_LIBRARIES} gmock_main pthread)

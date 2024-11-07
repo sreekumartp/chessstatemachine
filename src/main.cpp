@@ -1,20 +1,21 @@
 #include <statemachine.hpp>
+#include <iostream>
 
 int main()
 {
 
-GameSM myGame;
+GameSM myGame(new InitializedState());
 
     while(true)
     {
 
-            std::cout << "Enter event ('s' for start State Machine , 'q' to quit): ";
+            std::cout << "Enter event ('s' for start State Machine , 'q' to quit): " << std::endl;
 
                     char input;
 
                     std::cin >> input;
 
-        if (input == 'p')
+        if (input == 's')
         {
             myGame.startSM();
         }
