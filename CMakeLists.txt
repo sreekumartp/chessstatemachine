@@ -43,7 +43,7 @@ include_directories(include)
 add_executable(sm src/statemachine.cpp src/main.cpp)
 # Disable -Werror for Google Test
 set_target_properties(gtest PROPERTIES COMPILE_FLAGS "-Wno-error")
-set_target_properties(gtest PROPERTIES gtest_death_test_style "fast")
+set_target_properties(gtest PROPERTIES gtest_death_test_style "threadsafe")
 
 # Enable testing
 enable_testing()
