@@ -1,8 +1,38 @@
 #ifndef STATEMACHINE_H
 #define STATEMACHINE_H
 
+#include <map>
+#include <set>
 
-#include <iostream>
+
+enum class StateID
+{
+    UNKNOWN,
+    INITIALIZED,
+    PLAYING,
+    ANALYZING,
+    LOADING,
+    SAVING,
+    CONCLUDED,
+    TERMINATED,
+    PAUSED
+};
+
+
+ static const std::map<StateID , std::set<StateID> > validTransitions = {
+
+{StateID::INITIALIZED,{StateID::PLAYING,StateID::LOADING}},
+{StateID::PLAYING,{StateID::ANALYZING,StateID::CONCLUDED,StateID::SAVING,StateID::PAUSED,StateID::TERMINATED}},
+{StateID::LOADING,{StateID::PLAYING}},
+{StateID::SAVING,{StateID::PLAYING,StateID::CONCLUDED}},
+{StateID::PAUSED,{StateID::PLAYING}},
+{StateID::ANALYZING,{StateID::PLAYING}},
+{StateID::CONCLUDED,{StateID::TERMINATED,StateID::SAVING}},
+{StateID::TERMINATED,{}}
+
+ };
+
+
 
 class GameSM; // Forward declaration
 
@@ -10,9 +40,11 @@ class GameSM; // Forward declaration
 // interface
 class GameState
 {
+protected:
+
+    StateID stateID;
+
 public:
-    virtual void handlePushButtonEvent(GameSM* door) ;
-    virtual void handleKeyTurnEvent(GameSM* door) ;
  
     virtual void handleAppLaunched(GameSM* game) ;
     virtual void handleNewGame(GameSM* game) ;
@@ -27,6 +59,12 @@ public:
     virtual void handleResume(GameSM* game) ;
     
     virtual ~GameState() = default;
+
+
+    StateID getStateID() const { return stateID;}
+
+    virtual GameState* clone() const = 0;
+
 };
 
 //state objects
@@ -34,16 +72,18 @@ public:
 class InitializedState:public GameState
 {
 public:
-    void handleAppLaunched(GameSM* game) override;
+    InitializedState();
     void handleNewGame(GameSM* game) override;
     void handleLoadGame(GameSM* game) override;
-   
+    GameState* clone() const override;
 };
 
 
 class PlayingState:public GameState
 {
 public:
+    PlayingState();
+    GameState* clone() const override;
     void handleNewGame(GameSM* game) override;
     void handleLoadGame(GameSM* game) override;
     void handleBoardReady(GameSM* game) override;
@@ -51,7 +91,6 @@ public:
     void handleEndGame(GameSM* game) override;
     void handleGameOver(GameSM* game) override;
     void handleTurn(GameSM* game) override;
-    void handlePieceMoved(GameSM* game) override;
     void handlePause(GameSM* game) override;
     void handleResume(GameSM* game) override;
     };
@@ -59,6 +98,8 @@ public:
 class AnalyzingState:public GameState
 {
 public:
+    AnalyzingState();
+    GameState* clone() const override;
     void handleTurn(GameSM* game) override;
     void handlePieceMoved(GameSM* game) override;
 };
@@ -66,6 +107,8 @@ public:
 class LoadingState:public GameState
 {
 public:
+    LoadingState();
+    GameState* clone() const override;
     void handleBoardReady(GameSM* game) override;
    
 };
@@ -73,83 +116,60 @@ public:
 class SavingState:public GameState
 {
 public:
-        void handleBoardReady(GameSM* game) override;
+    SavingState();
+    GameState* clone() const override;
+    void handleBoardReady(GameSM* game) override;
 };
 
 
 class ConcludedState:public GameState
 {
 public:
-        void handleBoardReady(GameSM* game) override;
+    ConcludedState();
+    GameState* clone() const override;    
+    void handleEndGame(GameSM* game) override;
 };
 
 
 class TerminatedState:public GameState
 {
 public:
-    void handleBoardReady(GameSM* game) override;
+    TerminatedState();
+    GameState* clone() const override;    
+    void handleAppLaunched(GameSM* game) override;
     
 };
 
 class PauseState:public GameState
 {
 public:
+    PauseState();
+    GameState* clone() const override;       
     void handleResume(GameSM* game) override;
     
 };
 
-class OpenState:public GameState
-{
-public:
-    void handlePushButtonEvent(GameSM* door) override;
-    void handleKeyTurnEvent(GameSM* door) override;
-};
-
-class ClosedState:public GameState
-{
-public:
-    void handlePushButtonEvent(GameSM* door) override;
-    void handleKeyTurnEvent(GameSM* door) override;
-};
-
-class LockedState:public GameState
-{
-public:
-    void handlePushButtonEvent(GameSM* door) override;
-    void handleKeyTurnEvent(GameSM* door) override;
-};
-
-
 
 class GameSM
 {
+private:
+   
+    StateID stateID;
+    bool isValid(StateID from , StateID to);
+       
 public: 
     GameState* currentState;
-    GameSM():currentState(new ClosedState()){};
-    //{}
     GameSM(const GameSM& other);
-    // {
-    //     if (dynamic_cast<OpenState*>(other.currentState)) {
-    //         currentState = new OpenState();
-    //     } else if (dynamic_cast<ClosedState*>(other.currentState)) {
-    //         currentState = new ClosedState();
-    //     } else if (dynamic_cast<LockedState*>(other.currentState)) {
-    //         currentState = new LockedState();
-    //     }
-    // }
     GameSM& operator=(const GameSM& other); 
-    // {
-    //     if (this == &other) {
-    //         return *this;
-    //     }
-    //     delete currentState;
-    //     currentState = other.currentState;
-    //     return *this;
-    // }
-    void pushButton();
+    explicit GameSM(GameState* initialState);
+    GameSM(){currentState=new InitializedState();  stateID=StateID::INITIALIZED;};
+
+    void startSM();
+    void stopSM();  
     void TurnKey();
     void SetState(GameState* newState);
     GameState* getCurrentState();
+    void printCurrentState();
 
 };
 

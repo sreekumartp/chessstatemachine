@@ -1,0 +1,15 @@
+stateDiagram
+    [*] --> InitializedState
+    InitializedState --> PlayingState: handleNewGame
+    InitializedState --> LoadingState: handleLoadGame
+    PlayingState --> PauseState: handlePause
+    PlayingState --> ConcludedState: handleGameOver
+    PlayingState --> SavingState: handleSaveGame
+    PauseState --> PlayingState: handleResume
+    ConcludedState --> TerminatedState: handleEndGame
+    LoadingState --> PlayingState: handleBoardReady
+    SavingState --> PlayingState: handleSaveComplete
+    PlayingState --> PlayingState: handlePieceMoved
+    PlayingState --> AnalyzingState: handleTurn
+    AnalyzingState --> PlayingState: handleAnalysisComplete
+    [*] --> TerminatedState
