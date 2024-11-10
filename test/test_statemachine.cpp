@@ -436,7 +436,7 @@ TEST_F(GameStateMachineTest, AssignmentOperator) {
     ASSERT_NE(nullptr, playingState);
 }
 
-TEST_F(GameStateMachineTest, InitializedStateToTerminatedState) {
+TEST_F(GameStateMachineTest, InitializedStateToLoadingState2) {
     StateID currStateID = game->getCurrentState()->getStateID();
 
     // Verify pre-transition state
