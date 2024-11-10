@@ -1,7 +1,7 @@
 #include <iostream>
 #include <statemachine.hpp>
 #include <cassert>
-
+#include <stdexcept>
 
 
 
@@ -47,33 +47,16 @@ GameSM::GameSM(const GameSM& other)
 
 }
 
-
-
 GameSM& GameSM::operator=(const GameSM& other) {
     if (this == &other) {
         return *this;
     }
     delete currentState;
-    currentState = other.currentState;
-    if (dynamic_cast<InitializedState*>(other.currentState)) {
-        stateID = StateID::INITIALIZED;
-    } else if (dynamic_cast<PlayingState*>(other.currentState)) {
-        stateID = StateID::PLAYING;
-    } else if (dynamic_cast<AnalyzingState*>(other.currentState)) {
-        stateID = StateID::ANALYZING;
-    } else if (dynamic_cast<LoadingState*>(other.currentState)) {
-        stateID = StateID::LOADING;
-    } else if (dynamic_cast<SavingState*>(other.currentState)) {
-        stateID = StateID::SAVING;
-    } else if (dynamic_cast<ConcludedState*>(other.currentState)) {
-        stateID = StateID::CONCLUDED;
-    } else if (dynamic_cast<TerminatedState*>(other.currentState)) {
-        stateID = StateID::TERMINATED;
-    } else if (dynamic_cast<PauseState*>(other.currentState)) {
-        stateID = StateID::PAUSED;
-    }
+    currentState = other.currentState ? other.currentState->clone() : nullptr;
+    stateID = currentState ? currentState->getStateID() : StateID::INITIALIZED;
     return *this;
 }
+
 
 void GameSM::startSM()
 {
@@ -81,10 +64,29 @@ void GameSM::startSM()
     std::cout << "State machine started. Current state: " << typeid(*currentState).name() << std::endl;
 }
 
-void GameSM::stopSM()
+void GameSM::stopSM(){currentState->handleEndGame(this);}
+
+bool GameSM::isValid(StateID from , StateID To)
 {
-    currentState->handleEndGame(this);
+bool result = false;
+
+std::set<StateID> transitions = validTransitions.at(from);
+
+    if(transitions.find(To) != transitions.end())
+    {
+        result = true;
+    }
+    else
+    {
+        result = false;
+    }
+
+return result;
+
 }
+
+
+
 
 
 void GameSM::SetState(GameState* newState)
@@ -95,7 +97,11 @@ void GameSM::SetState(GameState* newState)
  
     std::cout << "Transitioning from state: " << typeid(*currentState).name() << " to state: " << typeid(*newState).name() << std::endl;
  
-    assert((newStateID != currStateID) && "Invalid state reentry");
+    bool valid = isValid(currStateID,newStateID);
+
+    assert(valid && "Invalid state transition");
+
+    // assert((newStateID != currStateID) && "Invalid state reentry");
 
     if (newStateID == currStateID) {
         delete newState;  // Clean up the new state if transition is invalid
@@ -103,14 +109,10 @@ void GameSM::SetState(GameState* newState)
     }
     delete currentState;
     currentState = newState;
+    
 }
 
-GameState* GameSM::getCurrentState()
-{
-
-return this->currentState;
-
-}
+GameState* GameSM::getCurrentState(){return this->currentState;}
 
 
 InitializedState::InitializedState() {
@@ -120,12 +122,6 @@ InitializedState::InitializedState() {
 
 GameState* InitializedState::clone() const { return new InitializedState(*this); }
 
-
-
-void InitializedState::handleAppLaunched(GameSM* game){
-    std::cout << "Application launched. Transitioning to InitializedState.\n";
-    game->SetState(new InitializedState());
-}
 void InitializedState::handleNewGame(GameSM* game){
     std::cout << "Starting a new game. Transitioning to PlayingState.\n";
         game->SetState(new PlayingState());
@@ -195,7 +191,7 @@ GameState* AnalyzingState::clone() const { return new AnalyzingState(*this); }
 
 void AnalyzingState::handleTurn(GameSM* game) {
     assert(false && "Invalid state transition: AnalyzingState::handleTurn");
-    throw std::logic_error("Invalid state transition: PlayingState::handleTurn");
+    throw std::logic_error("Invalid state transition: AnalyzingState::handleTurn");
     
 }
 

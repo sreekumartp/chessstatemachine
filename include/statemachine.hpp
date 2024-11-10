@@ -1,6 +1,9 @@
 #ifndef STATEMACHINE_H
 #define STATEMACHINE_H
 
+#include <map>
+#include <set>
+
 
 enum class StateID
 {
@@ -14,6 +17,22 @@ enum class StateID
     TERMINATED,
     PAUSED
 };
+
+
+ static const std::map<StateID , std::set<StateID> > validTransitions = {
+
+{StateID::INITIALIZED,{StateID::PLAYING,StateID::LOADING}},
+{StateID::PLAYING,{StateID::ANALYZING,StateID::CONCLUDED,StateID::SAVING,StateID::PAUSED,StateID::TERMINATED}},
+{StateID::LOADING,{StateID::PLAYING}},
+{StateID::SAVING,{StateID::PLAYING,StateID::CONCLUDED}},
+{StateID::PAUSED,{StateID::PLAYING}},
+{StateID::ANALYZING,{StateID::PLAYING}},
+{StateID::CONCLUDED,{StateID::TERMINATED,StateID::SAVING}},
+{StateID::TERMINATED,{}}
+
+ };
+
+
 
 class GameSM; // Forward declaration
 
@@ -54,7 +73,6 @@ class InitializedState:public GameState
 {
 public:
     InitializedState();
-    void handleAppLaunched(GameSM* game) override;
     void handleNewGame(GameSM* game) override;
     void handleLoadGame(GameSM* game) override;
     GameState* clone() const override;
@@ -135,9 +153,10 @@ public:
 class GameSM
 {
 private:
-
+   
     StateID stateID;
-    
+    bool isValid(StateID from , StateID to);
+       
 public: 
     GameState* currentState;
     GameSM(const GameSM& other);

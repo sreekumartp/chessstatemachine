@@ -13,7 +13,7 @@ public:
 
     void TearDown() override {
         // Code for cleaning up after each test
-        // delete game;
+        delete game;
     }
 };
 
@@ -58,6 +58,7 @@ TEST_F(GameStateMachineTest, PlayingStateToPauseState) {
 
 
 TEST_F(GameStateMachineTest, PauseStateToPlayingState) {
+    game->SetState(new PlayingState());
     game->SetState(new PauseState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -93,6 +94,7 @@ TEST_F(GameStateMachineTest, PlayingStateToConcludedState) {
 
 TEST_F(GameStateMachineTest, ConcludedStateToTerminatedState) {
 
+    game->SetState(new PlayingState());
     game->SetState(new ConcludedState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -110,6 +112,7 @@ TEST_F(GameStateMachineTest, ConcludedStateToTerminatedState) {
 }
 
 TEST_F(GameStateMachineTest, InitializedStateToLoadingState) {
+
 
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -162,6 +165,8 @@ TEST_F(GameStateMachineTest, PlayingStateToSavingState) {
 }
 
 TEST_F(GameStateMachineTest, SavingStateToPlayingState) {
+
+    game->SetState(new PlayingState());
     game->SetState(new SavingState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -215,6 +220,8 @@ TEST_F(GameStateMachineTest, InvalidTransitionPlayingStateToBoardReady) {
 }
 
 TEST_F(GameStateMachineTest, InvalidTransitionAnalyzingStateToTurn) {
+
+    game->SetState(new PlayingState());
     game->SetState(new AnalyzingState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -234,7 +241,7 @@ TEST_F(GameStateMachineTest, InvalidStateRentryInitializedStateToInitialzedState
     EXPECT_EQ(currStateID, StateID::INITIALIZED);
 
     // Attempt invalid transition
-    EXPECT_DEATH(game->SetState(new InitializedState()), "Invalid state reentry");
+    EXPECT_DEATH(game->SetState(new InitializedState()), "Invalid state transition");
 }
 
 
@@ -248,11 +255,13 @@ TEST_F(GameStateMachineTest, InvalidStateRentryPlayingStateToPlayingState) {
     EXPECT_EQ(currStateID, StateID::PLAYING);
 
     // Attempt invalid transition
-    EXPECT_DEATH(game->SetState(new PlayingState()), "Invalid state reentry");
+    EXPECT_DEATH(game->SetState(new PlayingState()), "Invalid state transition");
 
 }
 
 TEST_F(GameStateMachineTest, InvalidStateRentryPauseStateToPauseState) {
+    
+    game->SetState(new PlayingState);
     game->SetState(new PauseState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -260,7 +269,7 @@ TEST_F(GameStateMachineTest, InvalidStateRentryPauseStateToPauseState) {
     EXPECT_EQ(currStateID, StateID::PAUSED);
 
     // Attempt invalid transition
-    EXPECT_DEATH(game->SetState(new PauseState()), "Invalid state reentry");
+    EXPECT_DEATH(game->SetState(new PauseState()), "Invalid state transition");
 
 }
 
@@ -274,12 +283,13 @@ TEST_F(GameStateMachineTest, InvalidStateRentryLoadingStateToLoadingState) {
     EXPECT_EQ(currStateID, StateID::LOADING);
 
     // Attempt invalid transition
-    EXPECT_DEATH(game->SetState(new LoadingState()), "Invalid state reentry");
+    EXPECT_DEATH(game->SetState(new LoadingState()), "Invalid state transition");
 
 }
 
 TEST_F(GameStateMachineTest, InvalidStateRentrySavingStateToSavingState) {
 
+    game->SetState(new PlayingState());
     game->SetState(new SavingState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -287,10 +297,12 @@ TEST_F(GameStateMachineTest, InvalidStateRentrySavingStateToSavingState) {
     EXPECT_EQ(currStateID, StateID::SAVING);
 
     // Attempt invalid transition
-    EXPECT_DEATH(game->SetState(new SavingState()), "Invalid state reentry");
+    EXPECT_DEATH(game->SetState(new SavingState()), "Invalid state transition");
 }
 
 TEST_F(GameStateMachineTest, InvalidStateRentryConcludedStateToConcludedState) {
+    
+    game->SetState(new PlayingState());
     game->SetState(new ConcludedState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -298,13 +310,14 @@ TEST_F(GameStateMachineTest, InvalidStateRentryConcludedStateToConcludedState) {
     EXPECT_EQ(currStateID, StateID::CONCLUDED);
 
     // Attempt invalid transition
-    EXPECT_DEATH(game->SetState(new ConcludedState()), "Invalid state reentry");
+    EXPECT_DEATH(game->SetState(new ConcludedState()), "Invalid state transition");
 
 }
 
 
 TEST_F(GameStateMachineTest, InvalidStateRentryTerminatedStateToTerminatedState) {
 
+    game->SetState(new PlayingState());
     game->SetState(new TerminatedState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -312,7 +325,7 @@ TEST_F(GameStateMachineTest, InvalidStateRentryTerminatedStateToTerminatedState)
     EXPECT_EQ(currStateID, StateID::TERMINATED);
 
     // Attempt invalid transition
-    EXPECT_DEATH(game->SetState(new TerminatedState()), "Invalid state reentry");
+    EXPECT_DEATH(game->SetState(new TerminatedState()), "Invalid state transition");
 
 }
 
@@ -337,6 +350,7 @@ TEST_F(GameStateMachineTest, PlayingStateToAnalyzingState) {
 
 TEST_F(GameStateMachineTest, AnalyzingStateToPlayingState) {
 
+    game->SetState(new PlayingState());
     game->SetState(new AnalyzingState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -370,6 +384,7 @@ TEST_F(GameStateMachineTest, PlayingStateHandleTurn) {
 }
 
 TEST_F(GameStateMachineTest, AnalyzingStateHandlePieceMoved) {
+    game->SetState(new PlayingState());
     game->SetState(new AnalyzingState());
     StateID currStateID = game->getCurrentState()->getStateID();
 
@@ -386,7 +401,95 @@ TEST_F(GameStateMachineTest, AnalyzingStateHandlePieceMoved) {
 
  }
 
+
+TEST_F(GameStateMachineTest, CopyConstructor) {
+    game->SetState(new PlayingState());
+    StateID currStateID = game->getCurrentState()->getStateID();
+
+    // Verify pre-copy state
+    EXPECT_EQ(currStateID, StateID::PLAYING);
+
+    // Use copy constructor
+    GameSM copiedGame(*game);
+
+    StateID copiedStateID = copiedGame.getCurrentState()->getStateID();
+    // Verify copied state
+    EXPECT_EQ(copiedStateID, StateID::PLAYING);
+    auto* playingState = dynamic_cast<PlayingState*>(copiedGame.getCurrentState());
+    ASSERT_NE(nullptr, playingState);
+}
+TEST_F(GameStateMachineTest, AssignmentOperator) {
+    game->SetState(new PlayingState());
+    StateID currStateID = game->getCurrentState()->getStateID();
+
+    // Verify pre-assignment state
+    EXPECT_EQ(currStateID, StateID::PLAYING);
+
+    // Use assignment operator
+    GameSM assignedGame;
+    assignedGame = *game;
+
+    StateID assignedStateID = assignedGame.getCurrentState()->getStateID();
+    // Verify assigned state
+    EXPECT_EQ(assignedStateID, StateID::PLAYING);
+    auto* playingState = dynamic_cast<PlayingState*>(assignedGame.getCurrentState());
+    ASSERT_NE(nullptr, playingState);
+}
+
+TEST_F(GameStateMachineTest, InitializedStateToTerminatedState) {
+    StateID currStateID = game->getCurrentState()->getStateID();
+
+    // Verify pre-transition state
+    EXPECT_EQ(currStateID, StateID::INITIALIZED);
+
+    game->getCurrentState()->handleLoadGame(game);
+
+    StateID newStateID = game->getCurrentState()->getStateID();
+    // Verify post-transition state
+    EXPECT_EQ(newStateID, StateID::LOADING);
+    auto* newState = dynamic_cast<LoadingState*>(game->getCurrentState());
+    ASSERT_NE(nullptr, newState);
+}
+
+TEST_F(GameStateMachineTest, PlayingStateToTerminatedState) {
+    game->SetState(new PlayingState());
+    StateID currStateID = game->getCurrentState()->getStateID();
+
+    // Verify pre-transition state
+    EXPECT_EQ(currStateID, StateID::PLAYING);
+
+    game->getCurrentState()->handleEndGame(game);
+
+    StateID newStateID = game->getCurrentState()->getStateID();
+    // Verify post-transition state
+    EXPECT_EQ(newStateID, StateID::TERMINATED);
+    auto* terminatedState = dynamic_cast<TerminatedState*>(game->getCurrentState());
+    ASSERT_NE(nullptr, terminatedState);
+}
+
+TEST_F(GameStateMachineTest, PauseStateToPlayingState2) {
+
+    game->SetState(new PlayingState());  
+    game->SetState(new PauseState());
+    StateID currStateID = game->getCurrentState()->getStateID();
+
+    // Verify pre-transition state
+    EXPECT_EQ(currStateID, StateID::PAUSED);
+
+    game->getCurrentState()->handleResume(game);
+
+    StateID newStateID = game->getCurrentState()->getStateID();
+    // Verify post-transition state
+    EXPECT_EQ(newStateID, StateID::PLAYING);
+    auto* newState = dynamic_cast<PlayingState*>(game->getCurrentState());
+    ASSERT_NE(nullptr, newState);
+}
+
+
+ 
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
