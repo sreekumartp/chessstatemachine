@@ -40,7 +40,10 @@ set(CMAKE_CXX_CPPCHECK "cppcheck;--enable=all;--language=c++;--suppress=missingI
 include_directories(include)
 # Specify a directory for cpp files
 #file(GLOB SOURCES "src/statemachine.cpp, src/main.cpp")
-add_executable(sm src/statemachine.cpp src/main.cpp)
+add_library(libstatemachine src/statemachine.cpp)
+add_executable(sm src/main_statemachine.cpp)
+target_link_libraries(sm libstatemachine)
+
 # Disable -Werror for Google Test
 set_target_properties(gtest PROPERTIES COMPILE_FLAGS "-Wno-error")
 set_target_properties(gtest PROPERTIES gtest_death_test_style "threadsafe")
@@ -51,10 +54,11 @@ enable_testing()
 find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-add_executable(test_sm test/test_statemachine.cpp src/statemachine.cpp)
+
+add_executable(test_statemachine test/test_statemachine.cpp src/statemachine.cpp)
 
 # Link the test executable with the main project and GoogleTest
-target_link_libraries(test_sm ${GTEST_LIBRARIES} gmock_main pthread)
+target_link_libraries(test_statemachine ${GTEST_LIBRARIES} gmock_main pthread)
 
 # Add the test to CTest
-add_test(NAME GameStateMachineTest COMMAND test_sm --gtest_output=json:statemachine_report.json)
+add_test(NAME GameStateMachineTest COMMAND test_statemachine --gtest_output=json:statemachine_report.json)
